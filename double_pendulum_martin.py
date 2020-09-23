@@ -17,35 +17,34 @@ class DoublePendulum:
         M2 = self.M2
         L2 = self.L2
         theta1 = y[0]
-        theta2 = y[1]
-        omega1 = y[2]
+        theta2 = y[2]
+        omega1 = y[1]
         omega2 = y[3]
         g = self.g
 
         delta_theta = theta2 - theta1
         
         Y = [
-            ((M2* L2 * omega2 ** 2 * np.sin(delta_theta) * np.cos(delta_theta) + 
+            omega1,
+            (((M2* L2 * (omega2 ** 2) * np.sin(delta_theta) * np.cos(delta_theta)) + 
             M2 * g * np.sin(theta2) * np.cos(delta_theta) + 
-            M2 * L2 * omega2 ** 2 * np.sin(delta_theta) - 
+            M2 * L2 * (omega2 ** 2) * np.sin(delta_theta) - 
             (M1 + M2) * g * np.sin(theta1)) / 
             ((M1 + M2) * L1 - M2 * L1 * np.cos(delta_theta) ** 2)),
-            omega1,
-            ((-M2 * L2 * omega2 ** 2 * np.sin(delta_theta) * np.cos(delta_theta) + 
+            
+            omega2,
+            ((-M2 * L2 * (omega2 ** 2) * np.sin(delta_theta) * np.cos(delta_theta) + 
             (M1 + M2) * g * np.sin(theta1) * np.cos(delta_theta) - 
-            (M1 + M2) * L1 * omega1 ** 2 * np.sin(delta_theta) -
+            (M1 + M2) * L1 * (omega1 ** 2) * np.sin(delta_theta) -
             (M1 + M2) * g * np.sin(theta2)) / 
-            ((M1 + M2) * L2 - M2 * L2 * np.cos(delta_theta) ** 2)),
-            omega2
+            ((M1 + M2) * L2 - M2 * L2 * (np.cos(delta_theta) ** 2)))
             ]
-        
         return Y
 
 
     def solve(self, y0, T, dt, angles="rad"):
         if angles == "deg":
             y0 = np.radians(y0)
-
         self._answer = solve_ivp(self.__call__, [0, T], (y0), t_eval=np.linspace(0, T, dt), method="Radau")
         #return self._answer.t, self._answer.y
 
@@ -118,7 +117,7 @@ class DoublePendulum:
 
 if __name__ == '__main__':
     E = DoublePendulum()
-    E.solve((np.pi, 0.15, np.pi, 0.15), 7, 100)
+    E.solve((np.pi/6, 0.15, np.pi/6, 0.15), 7, 100)
     
     plt.plot(E.t, E.kinetic)
     plt.plot(E.t, E.potential)
