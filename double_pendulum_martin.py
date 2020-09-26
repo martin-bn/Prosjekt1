@@ -2,6 +2,10 @@ import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 
+import scipy.integrate as integrate
+import matplotlib.animation as animation
+
+
 
 class DoublePendulum:
     def __init__(self, M1=1, L1=1, M2=1, L2=1, g=9.81):
@@ -22,8 +26,9 @@ class DoublePendulum:
         omega2 = y[3]
         g = self.g
 
-        delta_theta = theta2 - theta1
-        
+        self.delta_theta = theta2 - theta1
+        delta_theta = self.delta_theta
+
         Y = [
             omega1,
             (((M2* L2 * (omega2 ** 2) * np.sin(delta_theta) * np.cos(delta_theta)) + 
@@ -43,6 +48,7 @@ class DoublePendulum:
 
 
     def solve(self, y0, T, dt, angles="rad"):
+        self.dt = dt
         if angles == "deg":
             y0 = np.radians(y0)
         self._answer = solve_ivp(self.__call__, [0, T], (y0), t_eval=np.linspace(0, T, dt), method="Radau")
@@ -115,11 +121,47 @@ class DoublePendulum:
     def total_energy(self):
         return self.potential + self.kinetic
 
+
+    def create_animation(self):
+        # Create empty figure
+        fig = plt.figure()
+        
+        # Configure figure
+        plt.axis('equal')
+        plt.axis('off')
+        plt.axis((-3, 3, -3, 3))
+        
+        # Make an "empty" plot object to be updated throughout the animation
+        self.pendulums, = plt.plot([], [], 'o-', lw=2)
+        
+        # Call FuncAnimation
+        self.animation = animation.FuncAnimation(fig,
+                                                 self._next_frame,
+                                                 frames=range(len(self.x1)), 
+                                                 repeat=None,
+                                                 interval=1000*self.dt, 
+                                                 blit=True)
+        
+    def _next_frame(self, i):
+        self.pendulums.set_data((0, self.x1[i], self.x2[i]),
+                                (0, self.y1[i], self.y2[i]))
+        return self.pendulums,
+    def show_animation(self):
+        plt.show()
+
+    def save_animation(self, filename):
+        self.animation.save(filename, fps=60)
+
+
 if __name__ == '__main__':
     E = DoublePendulum()
-    E.solve((np.pi/6, 0.15, np.pi/6, 0.15), 7, 100)
+    E.solve((np.pi/6, 0.15, np.pi/6, 0.15), 10, 100)
     
-    plt.plot(E.t, E.kinetic)
-    plt.plot(E.t, E.potential)
-    plt.plot(E.t, E.total_energy)
-    plt.show()
+    E.create_animation()
+    E._next_frame(60)
+
+    E.save_animation("animasjon.png")
+    #plt.plot(E.t, E.kinetic)
+    #plt.plot(E.t, E.potential)
+    #plt.plot(E.t, E.total_energy)
+    #plt.show()
