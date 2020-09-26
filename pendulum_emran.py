@@ -20,8 +20,8 @@ class Pendulum():
   
     def solve(self, y0, T, dt, angles="rad"):
         if angles == "deg":
-            self.theta = np.radians(self.theta)
-            self.omega = np.radians(self.omega)
+            y0[0] = np.radians(y0[0])
+            y0[1] = np.radians(y0[1])
         self._answer = solve_ivp(self.__call__, [0, T], (y0), t_eval=np.linspace(0, T, dt))
         #return self._answer.t, self._answer.y
 
@@ -72,7 +72,10 @@ class Pendulum():
             return self._answer.y[1]
         else:
             raise AttributeError("Ikke tilgjengelig før solver er kjørt")
-
+    
+    @property
+    def total_energy(self):
+        return self.potential + self.kinetic
 
 class DampenedPendulum(Pendulum):
     def __init__(self, B, L=1, M=1):
@@ -94,20 +97,13 @@ class DampenedPendulum(Pendulum):
 
 if __name__ == '__main__':
     E = DampenedPendulum(B=0.1, L=2)
-
     E.solve((np.pi/6, 0.15), 50, 1000)
-    #print(E.theta)
-    #B = E.omega
 
-    #print(A)
-    #for i in range(len(E.t)):
     plt.plot(E.t, E.theta)
-    #plt.plot(E.t, E.omega)
+    plt.plot(E.t, E.omega)
     plt.show()
-    #print(E.omega)
-    #print(E.potential)
-
-    #print(E.potential)
-    #plt.plot(E.t, E.potential)
-    #plt.plot(E.t, E.kinetic)
-    #plt.show()
+    
+    plt.plot(E.t, E.potential)
+    plt.plot(E.t, E.kinetic)
+    plt.plot(E.t, E.total_energy)
+    plt.show()
