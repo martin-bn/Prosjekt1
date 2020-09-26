@@ -22,12 +22,15 @@ def domega1_dt(M1, M2, L1, L2, theta1, theta2, omega1, omega2):
             ((M1 + M2) * L1 - M2 * L1 * np.cos(delta(theta1, theta2)) ** 2))
 
 
+
 def domega2_dt(M1, M2, L1, L2, theta1, theta2, omega1, omega2):
     return ((-M2 * L2 * omega1 ** 2 * np.sin(delta(theta1, theta2)) * np.cos(delta(theta1, theta2)) + 
             (M1 + M2) * g * np.sin(theta1) * np.cos(delta(theta1, theta2)) - 
             (M1 + M2) * L1 * omega1 ** 2 * np.sin(delta(theta1, theta2)) -
             (M1 + M2) * g * np.sin(theta2)) / 
             ((M1 + M2) * L2 - M2 * L2 * np.cos(delta(theta1, theta2)) ** 2))
+
+
 
 
 @pytest.mark.parametrize(
@@ -73,3 +76,5 @@ def test_domega2_dt(theta1, theta2, expected):
         abs(domega2_dt(M1, M2, L1, L2, theta1, theta2, omega1, omega2) - expected)
         < 1e-10
     )
+
+
