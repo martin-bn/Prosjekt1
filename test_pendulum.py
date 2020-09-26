@@ -1,18 +1,31 @@
 from pendulum import Pendulum
 import numpy as np
-import pytest
+import unittest
+
+class TestPendulum(unittest.TestCase):
+    def test_pendulum_omega(self):
+        E = Pendulum(L=2.7)
+        value = E(1, [np.pi/6, 0.15])
+        self.assertEqual(value[0], 0.15)
+
+    def test_pendulum_theta(self):
+        E = Pendulum(L=2.7)
+        value = E(1, [np.pi/6, 0.15])
+        self.assertAlmostEqual(value[1], -1.8166666666)
+
+    def test_pendulum_zero(self):
+        E = Pendulum()
+        value = E(0, (0, 0))
+        self.assertEqual(value, [0, 0])
+
+    def test_pendulum_cartesian(self):
+        E = Pendulum(L=2.7)
+        E.solve((np.pi/6, 0.15), 10, 100)
+        for i in range(len(E.x)):
+            answer = (E.x[i]**2 + E.y[i]**2)
+        self.assertAlmostEqual(E.L**2,  answer)
 
 
-@pytest.mark.parametrize("arg, expected", [ [(0, 0), [0, 0]] ])
-def test_pendulum_one(arg, expected):
-    A = Pendulum(arg[0], arg[1])
-    E = A(0, 0)
-    assert E == expected
 
-@pytest.mark.parametrize("arg, expected", [[(np.pi/6, 0.15, 2.7), [0.15, 1.8166]]])
-def test_pendulum_two(arg, expected):
-    A = Pendulum(arg[0], arg[1], arg[2])
-    E = A(0, 0)
-    tol = [1e-40, 1e-40]
-    assert [abs(E[0] - expected[0]), abs(E[1]- expected[1])] <= tol
-
+if __name__ == '__main__':
+    unittest.main()
